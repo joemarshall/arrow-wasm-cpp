@@ -189,8 +189,10 @@ set(ARROW_DATASET OFF)
 set(ARROW_FUZZING OFF)
 set(ARROW_GANDIVA OFF)
 set(ARROW_OPTIONAL_INSTALL OFF)
-set(ARROW_PARQUET OFF)
-set(ARROW_PYTHON OFF)
+set(ARROW_PARQUET ON)
+set(ARROW_PYTHON ON)
+set(ARROW_COMPUTE ON)
+set(ARROW_CSV ON)
 set(ARROW_JNI OFF)
 set(ARROW_ORC OFF)
 set(ARROW_ORC OFF)
@@ -232,29 +234,29 @@ endif()
 message("${BUILD_MESSAGE}\n")
 
 
-set(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} \
-    -s EXPORT_ES6=1 \
-    -s NO_EXIT_RUNTIME=1 \
-    -s NO_FILESYSTEM=1 \
-    -s ALLOW_MEMORY_GROWTH=1 \
-    -s MODULARIZE=1 \
-    -s EXPORT_NAME=\"load_arrow_wasm\" \
-    -s MAXIMUM_MEMORY=4gb \
-    -s USE_ES6_IMPORT_META=0 \
-    -s EXPORTED_FUNCTIONS=\"['_main']\" \
-")
 
 add_library(arrow_wasm ${SOURCE_FILES})
 target_compile_definitions(arrow_wasm PRIVATE ARROW_WASM_ENABLE_WASM=1)
 set_target_properties(arrow_wasm PROPERTIES COMPILE_FLAGS "")
 
+set(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} \
+        -s MODULARIZE=1 \
+        -s LINKABLE=1 \
+        -s EXPORT_ALL=1 \
+        -s WASM=1 \
+        -s SIDE_MODULE=1 \
+        -std=c++14 \
+        -s LZ4=1 \
+        -s USE_ZLIB=1 \
+        -L $(CPYTHONROOT)/installs/python-$(PYVERSION)/lib/ \"
+")
+
 # "esm/erspective.cpp.js" from CMAKE_EXECUTABLE_SYNTAX
-add_executable(arrow_wasm_esm src/cpp/emscripten.cpp)
+file(WRITE ${CMAKE_BUILD_FOLDER}/null.cpp "")
+add_executable(arrow_wasm_esm ${CMAKE_BUILD_FOLDER}/null.cpp)
 target_link_libraries(arrow_wasm_esm arrow_wasm)
-target_link_options(arrow_wasm_esm PRIVATE -s ENVIRONMENT=worker)
-target_compile_definitions(arrow_wasm_esm PRIVATE ARROW_WASM_ENABLE_WASM=1)
-set_target_properties(arrow_wasm_esm PROPERTIES RUNTIME_OUTPUT_DIRECTORY "./esm/")
-set_target_properties(arrow_wasm_esm PROPERTIES OUTPUT_NAME "arrow_wasm.cpp")
+set_target_properties(arrow_wasm_esm PROPERTIES RUNTIME_OUTPUT_DIRECTORY "./pyodide/")
+set_target_properties(arrow_wasm_esm PROPERTIES OUTPUT_NAME "arrow_wasm")
 
 # "cjs/arrow_wasm.cpp.js" from CMAKE_EXECUTABLE_SYNTAX
 add_executable(arrow_wasm_cjs src/cpp/emscripten.cpp)
