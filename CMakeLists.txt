@@ -91,7 +91,7 @@ set(ARROW_PYTHON ON)
 set(ARROW_JNI OFF)
 set(ARROW_ORC OFF)
 set(ARROW_ORC OFF)
-
+set(ARROW_IPC ON)
 
 set(ARROW_BUILD_STATIC ON)
 set(ARROW_NO_DEPRECATED_API ON)
@@ -151,6 +151,13 @@ add_executable(${name} ${CMAKE_BINARY_DIR}/arrow-src/python/pyarrow/${name}.cpp)
 set_target_properties(${name} PROPERTIES OUTPUT_NAME ${name})
 set_target_properties(${name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "./pyodide/pyarrow")
 set_target_properties(${name} PROPERTIES SUFFIX .so)
+target_link_options(${name} PUBLIC -Wl,${CMAKE_BINARY_DIR}/pyodide/pyarrow/libarrow.so)
+add_dependencies(${name} arrow_pyodide)
+add_custom_command(
+	TARGET ${name}
+	POST_BUILD
+	COMMAND python ${CMAKE_SOURCE_DIR}/scripts/alter_dlink_requires ${CMAKE_BINARY_DIR}/pyodide/pyarrow/${name}.so libarrow.so /lib/python3.10/site-packages/pyarrow/libarrow.so
+)
 endfunction()
 
 function(copy_python_source name)
@@ -175,20 +182,19 @@ set_target_properties(arrow_pyodide PROPERTIES OUTPUT_NAME "libarrow")
 set_target_properties(arrow_pyodide PROPERTIES SUFFIX ".so")
 target_link_libraries(arrow_pyodide arrow thrift)
 
-
 # make the python module
 
 
 build_cython_submodule(lib)
 #build_cython_submodule(_plasma)
-#build_cython_submodule(_dataset)
+build_cython_submodule(_dataset)
 #build_cython_submodule(_hdfs)
 #build_cython_submodule(_fs)
-#build_cython_submodule(_dataset_parquet)
+build_cython_submodule(_dataset_parquet)
 #build_cython_submodule(_feather)
-#build_cython_submodule(_csv)
+build_cython_submodule(_csv)
 #build_cython_submodule(_json)
-#build_cython_submodule(_parquet)
+build_cython_submodule(_parquet)
 #build_cython_submodule(gandiva)
 #build_cython_submodule(_s3fs)
 #build_cython_submodule(_exec_plan)

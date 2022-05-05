@@ -104,40 +104,232 @@ set(ARROW_SRCS
     vendored/double-conversion/diy-fp.cc
     vendored/double-conversion/strtod.cc)
 
+if(ARROW_FILESYSTEM)
+  if(ARROW_HDFS)
+    add_definitions(-DARROW_HDFS)
+  endif()
+
+  list(APPEND
+       ARROW_SRCS
+       filesystem/filesystem.cc
+       filesystem/localfs.cc
+       filesystem/mockfs.cc
+       filesystem/path_util.cc
+       filesystem/util_internal.cc)
+
+  if(ARROW_GCS)
+    list(APPEND ARROW_SRCS filesystem/gcsfs.cc filesystem/gcsfs_internal.cc)
+    set_source_files_properties(filesystem/gcsfs.cc filesystem/gcsfs_internal.cc
+                                PROPERTIES SKIP_PRECOMPILE_HEADERS ON
+                                           SKIP_UNITY_BUILD_INCLUSION ON)
+  endif()
+  if(ARROW_HDFS)
+    list(APPEND ARROW_SRCS filesystem/hdfs.cc)
+  endif()
+  if(ARROW_S3)
+    list(APPEND ARROW_SRCS filesystem/s3fs.cc)
+    set_source_files_properties(filesystem/s3fs.cc
+                                PROPERTIES SKIP_PRECOMPILE_HEADERS ON
+                                           SKIP_UNITY_BUILD_INCLUSION ON)
+  endif()
+endif()
+
+if(ARROW_IPC)
+  list(APPEND
+       ARROW_SRCS
+       ipc/dictionary.cc
+       ipc/feather.cc
+       ipc/message.cc
+       ipc/metadata_internal.cc
+       ipc/options.cc
+       ipc/reader.cc
+       ipc/writer.cc)
+
+  if(ARROW_JSON)
+    list(APPEND ARROW_SRCS ipc/json_simple.cc)
+  endif()
+endif()
+
+if(ARROW_JSON)
+  list(APPEND
+       ARROW_SRCS
+       json/options.cc
+       json/chunked_builder.cc
+       json/chunker.cc
+       json/converter.cc
+       json/object_parser.cc
+       json/object_writer.cc
+       json/parser.cc
+       json/reader.cc)
+endif()
+
+
+if(ARROW_CSV)
+  list(APPEND
+       ARROW_SRCS
+       csv/converter.cc
+       csv/chunker.cc
+       csv/column_builder.cc
+       csv/column_decoder.cc
+       csv/options.cc
+       csv/parser.cc
+       csv/reader.cc)
+  if(ARROW_COMPUTE)
+    list(APPEND ARROW_SRCS csv/writer.cc)
+  endif()
+endif()
+
+if(ARROW_COMPUTE)
+  list(APPEND
+       ARROW_SRCS
+       compute/api_aggregate.cc
+       compute/api_scalar.cc
+       compute/api_vector.cc
+       compute/cast.cc
+       compute/exec.cc
+       compute/exec/aggregate_node.cc
+       compute/exec/bloom_filter.cc
+       compute/exec/exec_plan.cc
+       compute/exec/expression.cc
+       compute/exec/filter_node.cc
+       compute/exec/hash_join.cc
+       compute/exec/hash_join_dict.cc
+       compute/exec/hash_join_node.cc
+       compute/exec/ir_consumer.cc
+       compute/exec/key_compare.cc
+       compute/exec/key_encode.cc
+       compute/exec/key_hash.cc
+       compute/exec/key_map.cc
+       compute/exec/options.cc
+       compute/exec/order_by_impl.cc
+       compute/exec/partition_util.cc
+       compute/exec/options.cc
+       compute/exec/project_node.cc
+       compute/exec/sink_node.cc
+       compute/exec/source_node.cc
+       compute/exec/task_util.cc
+       compute/exec/tpch_node.cc
+       compute/exec/union_node.cc
+       compute/exec/util.cc
+       compute/function.cc
+       compute/function_internal.cc
+       compute/kernel.cc
+       compute/light_array.cc
+       compute/registry.cc
+       compute/kernels/aggregate_basic.cc
+       compute/kernels/aggregate_mode.cc
+       compute/kernels/aggregate_quantile.cc
+       compute/kernels/aggregate_tdigest.cc
+       compute/kernels/aggregate_var_std.cc
+       compute/kernels/codegen_internal.cc
+       compute/kernels/hash_aggregate.cc
+       compute/kernels/row_encoder.cc
+       compute/kernels/scalar_arithmetic.cc
+       compute/kernels/scalar_boolean.cc
+       compute/kernels/scalar_cast_boolean.cc
+       compute/kernels/scalar_cast_dictionary.cc
+       compute/kernels/scalar_cast_internal.cc
+       compute/kernels/scalar_cast_nested.cc
+       compute/kernels/scalar_cast_numeric.cc
+       compute/kernels/scalar_cast_string.cc
+       compute/kernels/scalar_cast_temporal.cc
+       compute/kernels/scalar_compare.cc
+       compute/kernels/scalar_if_else.cc
+       compute/kernels/scalar_nested.cc
+       compute/kernels/scalar_random.cc
+       compute/kernels/scalar_set_lookup.cc
+       compute/kernels/scalar_string_ascii.cc
+       compute/kernels/scalar_string_utf8.cc
+       compute/kernels/scalar_temporal_binary.cc
+       compute/kernels/scalar_temporal_unary.cc
+       compute/kernels/scalar_validity.cc
+       compute/kernels/util_internal.cc
+       compute/kernels/vector_array_sort.cc
+       compute/kernels/vector_hash.cc
+       compute/kernels/vector_nested.cc
+       compute/kernels/vector_replace.cc
+       compute/kernels/vector_selection.cc
+       compute/kernels/vector_sort.cc)
+endif()
+
+if(ARROW_WITH_BROTLI)
+  add_definitions(-DARROW_WITH_BROTLI)
+  list(APPEND ARROW_SRCS util/compression_brotli.cc)
+endif()
+
+if(ARROW_WITH_BZ2)
+  add_definitions(-DARROW_WITH_BZ2)
+  list(APPEND ARROW_SRCS util/compression_bz2.cc)
+endif()
+
+if(ARROW_WITH_LZ4)
+  add_definitions(-DARROW_WITH_LZ4)
+  list(APPEND ARROW_SRCS util/compression_lz4.cc)
+endif()
+
+if(ARROW_WITH_OPENTELEMETRY)
+  list(APPEND ARROW_SRCS util/tracing_internal.cc)
+endif()
+
+if(ARROW_WITH_SNAPPY)
+  add_definitions(-DARROW_WITH_SNAPPY)
+  list(APPEND ARROW_SRCS util/compression_snappy.cc)
+endif()
+
+if(ARROW_WITH_ZLIB)
+  add_definitions(-DARROW_WITH_ZLIB)
+  list(APPEND ARROW_SRCS util/compression_zlib.cc)
+endif()
+
+if(ARROW_WITH_ZSTD)
+  add_definitions(-DARROW_WITH_ZSTD)
+  list(APPEND ARROW_SRCS util/compression_zstd.cc)
+endif()
+
 list(TRANSFORM ARROW_SRCS PREPEND ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/)
 
-set(PARQUET_SRCS
-    arrow/path_internal.cc
-    arrow/reader.cc
-    arrow/reader_internal.cc
-    arrow/schema.cc
-    arrow/schema_internal.cc
-    arrow/writer.cc
-    bloom_filter.cc
-    column_reader.cc
-    column_scanner.cc
-    column_writer.cc
-    encoding.cc
-    encryption/encryption.cc
-    encryption/internal_file_decryptor.cc
-    encryption/internal_file_encryptor.cc
-    exception.cc
-    file_reader.cc
-    file_writer.cc
-    level_comparison.cc
-    level_conversion.cc
-    metadata.cc
-    murmur3.cc
-    ../generated/parquet_constants.cpp
-    ../generated/parquet_types.cpp
-    platform.cc
-    printer.cc
-    properties.cc
-    schema.cc
-    statistics.cc
-    stream_reader.cc
-    stream_writer.cc
-    types.cc)
+set(ARROW_PYTHON_SRCS
+    arrow_to_pandas.cc
+    benchmark.cc
+    common.cc
+    datetime.cc
+    decimal.cc
+    deserialize.cc
+    extension_type.cc
+    gdb.cc
+    helpers.cc
+    inference.cc
+    init.cc
+    io.cc
+    ipc.cc
+    numpy_convert.cc
+    numpy_to_arrow.cc
+    python_to_arrow.cc
+    pyarrow.cc
+    serialize.cc
+    udf.cc)
+
+
+if(ARROW_CSV)
+  list(APPEND ARROW_PYTHON_SRCS csv.cc)
+endif()
+
+if(ARROW_FILESYSTEM)
+  list(APPEND ARROW_PYTHON_SRCS filesystem.cc)
+endif()
+
+if(PARQUET_REQUIRE_ENCRYPTION)
+  list(APPEND ARROW_PYTHON_SRCS parquet_encryption.cc)
+endif()
+
+list(TRANSFORM ARROW_PYTHON_SRCS PREPEND ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/python/)
+
+set(PARQUET_SRCS arrow/path_internal.cc arrow/reader.cc arrow/reader_internal.cc arrow/schema.cc 
+    arrow/schema_internal.cc arrow/writer.cc bloom_filter.cc column_reader.cc column_scanner.cc column_writer.cc 
+    encoding.cc encryption/encryption.cc encryption/internal_file_decryptor.cc 
+    encryption/internal_file_encryptor.cc exception.cc file_reader.cc file_writer.cc level_comparison.cc 
+    level_conversion.cc metadata.cc murmur3.cc ../generated/parquet_constants.cpp ../generated/parquet_types.cpp 
+    platform.cc printer.cc properties.cc schema.cc statistics.cc stream_reader.cc stream_writer.cc types.cc)
 
 list(TRANSFORM PARQUET_SRCS PREPEND ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/parquet/)
 
@@ -185,7 +377,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
     set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif()
 
-add_library(arrow STATIC ${ARROW_SRCS} ${PARQUET_SRCS})
+add_library(arrow STATIC ${ARROW_SRCS} ${PARQUET_SRCS} ${ARROW_PYTHON_SRCS})
 
 include_directories(${CMAKE_BINARY_DIR}/rapidjson-src/include)
 include_directories(/usr/local/include/)
