@@ -153,11 +153,6 @@ set_target_properties(${name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "./pyodide/pya
 set_target_properties(${name} PROPERTIES SUFFIX .so)
 target_link_options(${name} PUBLIC -Wl,${CMAKE_BINARY_DIR}/pyodide/pyarrow/libarrow.so)
 add_dependencies(${name} arrow_pyodide)
-add_custom_command(
-	TARGET ${name}
-	POST_BUILD
-	COMMAND python ${CMAKE_SOURCE_DIR}/scripts/alter_dlink_requires ${CMAKE_BINARY_DIR}/pyodide/pyarrow/${name}.so libarrow.so /lib/python3.10/site-packages/pyarrow/libarrow.so
-)
 endfunction()
 
 function(copy_python_source name)
@@ -294,7 +289,12 @@ copy_python_source(parquet/__init__.py)
 copy_python_source(feather.py)
 copy_python_source(hdfs.py)
 #copy_python_source(__init__.py)
-file(WRITE ${CMAKE_BINARY_DIR}/pyodide/pyarrow/__init.py "")
+file(WRITE ${CMAKE_BINARY_DIR}/pyodide/pyarrow/__init.py [=[
+# make sure that we always have access to libarrow when the library is imported in any way
+import js
+js.pyodide._module.loadDynamicLibrary("/lib/python3.10/site-packages/pyarrow/libarrow.so",{"loadAsync":False,"Global":True})
+]=]
+)
 copy_python_source(compat.py)
 #copy_python_source(ipc.py)
 
