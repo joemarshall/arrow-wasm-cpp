@@ -151,7 +151,6 @@ add_executable(${name} ${CMAKE_BINARY_DIR}/arrow-src/python/pyarrow/${name}.cpp)
 set_target_properties(${name} PROPERTIES OUTPUT_NAME ${name})
 set_target_properties(${name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "./pyodide/pyarrow")
 set_target_properties(${name} PROPERTIES SUFFIX .so)
-target_link_options(${name} PUBLIC -Wl,${CMAKE_BINARY_DIR}/pyodide/pyarrow/libarrow.so)
 add_dependencies(${name} arrow_pyodide)
 endfunction()
 
