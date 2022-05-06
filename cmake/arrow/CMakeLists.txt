@@ -1,5 +1,23 @@
 set(CMAKE_SHARED_LIBRARY_SUFFIX .so)
 
+# patch an error in dataset/file_csv.cc
+file(WRITE ${CMAKE_BINARY_DIR}/csv.patch [=[
+*** src/arrow/dataset/file_csv.cc        2022-05-05 23:20:47.191924200 +0000
+--- src/arrow/dataset/file_csv.cc 2022-05-05 23:20:55.101924200 +0000
+***************
+*** 20,25 ****
+--- 20,26 ----
+  #include <algorithm>
+  #include <memory>
+  #include <string>
++ #include <sstream>
+  #include <unordered_set>
+  #include <utility>
+]=])
+
+execute_process(COMMAND patch -p0 -i ${CMAKE_BINARY_DIR}/csv.patch 
+WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} )
+
 set(ARROW_SRCS
     array/array_base.cc
     array/array_binary.cc
@@ -103,6 +121,37 @@ set(ARROW_SRCS
     vendored/double-conversion/fixed-dtoa.cc
     vendored/double-conversion/diy-fp.cc
     vendored/double-conversion/strtod.cc)
+
+if(ARROW_DATASET)
+
+      list(APPEND
+           ARROW_SRCS
+        dataset/dataset.cc
+        dataset/dataset_writer.cc
+        dataset/discovery.cc
+        dataset/file_base.cc
+        dataset/file_ipc.cc
+        dataset/partition.cc
+        dataset/plan.cc
+        dataset/projector.cc
+        dataset/scanner.cc)
+
+
+    if(ARROW_CSV)
+      list(APPEND 
+        ARROW_SRCS dataset/file_csv.cc)
+    endif()
+
+    if(ARROW_ORC)
+      list(APPEND 
+        ARROW_SRCS dataset/file_orc.cc)
+    endif()
+
+if(ARROW_PARQUET)
+  list(APPEND
+    ARROW_SRCS dataset/file_parquet.cc)
+endif()
+endif()
 
 if(ARROW_FILESYSTEM)
   if(ARROW_HDFS)

@@ -74,7 +74,7 @@ set(ARROW_CUDA OFF)
 
 set(ARROW_DATASET ON)
 set(ARROW_FILESYSTEM ON)
-  set(ARROW_HDFS OFF)
+set(ARROW_HDFS OFF)
 set(ARROW_JSON ON)
 set(ARROW_COMPUTE ON)
 set(ARROW_FUZZING OFF)
@@ -156,11 +156,14 @@ endfunction()
 
 function(copy_python_source name)
 # copy after arrow is downloaded and everything is build, not in configure step
-add_custom_command(
+    # make sure folder exists
+    get_filename_component(OWNER_DIR ${CMAKE_BINARY_DIR}/pyodide/pyarrow/${name} DIRECTORY)
+    file(MAKE_DIRECTORY ${OWNER_DIR})
+    add_custom_command(
         TARGET arrow_pyodide PRE_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy
+                COMMAND ${CMAKE_COMMAND} -E copy
                 ${CMAKE_BINARY_DIR}/arrow-src/python/pyarrow/${name}
-                ${CMAKE_BINARY_DIR}/pyodide/pyarrow)
+                ${CMAKE_BINARY_DIR}/pyodide/pyarrow/${name})
 endfunction()
 
 build_dep(thrift)
@@ -178,12 +181,11 @@ target_link_libraries(arrow_pyodide arrow thrift)
 
 # make the python module
 
-
 build_cython_submodule(lib)
 #build_cython_submodule(_plasma)
 build_cython_submodule(_dataset)
 #build_cython_submodule(_hdfs)
-#build_cython_submodule(_fs)
+build_cython_submodule(_fs)
 build_cython_submodule(_dataset_parquet)
 #build_cython_submodule(_feather)
 build_cython_submodule(_csv)
@@ -195,7 +197,7 @@ build_cython_submodule(_parquet)
 #build_cython_submodule(_cuda)
 #build_cython_submodule(_orc)
 #build_cython_submodule(_dataset_orc)
-#build_cython_submodule(_compute)
+build_cython_submodule(_compute)
 #build_cython_submodule(_flight)
 
 copy_python_source(filesystem.py)
@@ -288,7 +290,7 @@ copy_python_source(parquet/__init__.py)
 copy_python_source(feather.py)
 copy_python_source(hdfs.py)
 #copy_python_source(__init__.py)
-file(WRITE ${CMAKE_BINARY_DIR}/pyodide/pyarrow/__init.py [=[
+file(WRITE ${CMAKE_BINARY_DIR}/pyodide/pyarrow/__init__.py [=[
 # make sure that we always have access to libarrow when the library is imported in any way
 import js
 js.pyodide._module.loadDynamicLibrary("/lib/python3.10/site-packages/pyarrow/libarrow.so",{"loadAsync":False,"Global":True})
