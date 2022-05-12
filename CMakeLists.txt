@@ -74,7 +74,7 @@ set(ARROW_CUDA OFF)
 
 set(ARROW_DATASET ON)
 set(ARROW_FILESYSTEM ON)
-set(ARROW_HDFS OFF)
+set(ARROW_HDFS ON)
 set(ARROW_JSON ON)
 set(ARROW_COMPUTE ON)
 set(ARROW_FUZZING OFF)
@@ -104,11 +104,15 @@ set(RAPIDJSON_BUILD_CXX11 ON)
 option(RAPIDJSON_ENABLE_INSTRUMENTATION_OPT OFF)
 
 
+include_directories(${CMAKE_BINARY_DIR}/flatbuffers-build/include/)
+include_directories (/src/cpython/installs/python-3.10.2/include/python3.10/)
+include_directories(/src/packages/.artifacts/lib/python3.10/site-packages/numpy/core/include/)
+include_directories(${CMAKE_BINARY_DIR}/arrow-src/cpp/thirdparty/hadoop/include)
+
+
 function (build_dep name)
 
-    include_directories(${CMAKE_BINARY_DIR}/flatbuffers-build/include/)
-    include_directories (/src/cpython/installs/python-3.10.2/include/python3.10/)
-    include_directories(/src/packages/.artifacts/lib/python3.10/site-packages/numpy/core/include/)
+
 
     configure_file("${CMAKE_SOURCE_DIR}/cmake/${name}.txt.in"
                 ${name}-download/CMakeLists.txt COPYONLY)
@@ -184,12 +188,13 @@ target_link_libraries(arrow_pyodide arrow thrift)
 build_cython_submodule(lib)
 #build_cython_submodule(_plasma)
 build_cython_submodule(_dataset)
-#build_cython_submodule(_hdfs)
+build_cython_submodule(_hdfs)
+build_cython_submodule(_hdfsio)
 build_cython_submodule(_fs)
 build_cython_submodule(_dataset_parquet)
 #build_cython_submodule(_feather)
 build_cython_submodule(_csv)
-#build_cython_submodule(_json)
+build_cython_submodule(_json)
 build_cython_submodule(_parquet)
 #build_cython_submodule(gandiva)
 #build_cython_submodule(_s3fs)
@@ -290,14 +295,19 @@ copy_python_source(parquet/__init__.py)
 copy_python_source(feather.py)
 copy_python_source(hdfs.py)
 #copy_python_source(__init__.py)
+file(READ ${CMAKE_BINARY_DIR}/arrow-src/python/pyarrow/__init__.py OLD_INIT_PY)
 file(WRITE ${CMAKE_BINARY_DIR}/pyodide/pyarrow/__init__.py [=[
-# make sure that we always have access to libarrow when the library is imported in any way
-import js
-js.pyodide._module.loadDynamicLibrary("/lib/python3.10/site-packages/pyarrow/libarrow.so",{"loadAsync":False,"Global":True})
+# load libarrow into the global namespace on first import otherwise all things depending on it won't work right
+import pyodide as __pyodide
+import pyodide_js as __pjs
+import js as __js
+__pjs._module.loadDynamicLibrary("/lib/python3.10/site-packages/pyarrow/libarrow.so",__pyodide.to_js({"global":True,"loadAsync":False},dict_converter=__js.Object.fromEntries))
 ]=]
 )
+file(APPEND ${CMAKE_BINARY_DIR}/pyodide/pyarrow/__init__.py ${OLD_INIT_PY})
+
 copy_python_source(compat.py)
-#copy_python_source(ipc.py)
+copy_python_source(ipc.py)
 
 file(WRITE ${CMAKE_BINARY_DIR}/pyodide/setup.cfg [=[
 [metadata]

@@ -67,8 +67,8 @@ set(ARROW_SRCS
     io/caching.cc
     io/compressed.cc
     io/file.cc
-#    io/hdfs.cc
-#    io/hdfs_internal.cc
+    io/hdfs.cc
+    io/hdfs_internal.cc
     io/interfaces.cc
     io/memory.cc
     io/slow.cc
@@ -387,34 +387,9 @@ set_property(SOURCE util/io_util.cc
            APPEND_STRING
            PROPERTY COMPILE_FLAGS " -Wno-unused-macros -stdlib=libc++")
 
-# don't do this because we don't use IPC
 
-# make clean will delete the generated file
-#set_source_files_properties(${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/Message_generated.h PROPERTIES GENERATED TRUE)
-#set_source_files_properties(${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/File_generated.h PROPERTIES GENERATED TRUE)
-#set_source_files_properties(${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/Schema_generated.h PROPERTIES GENERATED TRUE)
-#set_source_files_properties(${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/Tensor_generated.h PROPERTIES GENERATED TRUE)
-#set_source_files_properties(${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/SparseTensor_generated.h PROPERTIES GENERATED TRUE)
-#set_source_files_properties(${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/feather_generated.h PROPERTIES GENERATED TRUE)
-
-#set(FBS_OUTPUT_FILES
-#    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/Message_generated.h
-#    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/File_generated.h
-#    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/Schema_generated.h
-#    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/Tensor_generated.h
-#    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/SparseTensor_generated.h
-#    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/feather_generated.h)
-
-#set(FBS_SRC
-#    ${CMAKE_BINARY_DIR}/arrow-src/format/Message.fbs
-#    ${CMAKE_BINARY_DIR}/arrow-src/format/File.fbs
-#    ${CMAKE_BINARY_DIR}/arrow-src/format/Schema.fbs
-#    ${CMAKE_BINARY_DIR}/arrow-src/format/Tensor.fbs
-#    ${CMAKE_BINARY_DIR}/arrow-src/format/SparseTensor.fbs
-#    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/feather.fbs)
-
-include_directories(src)
 include_directories(flatbuffers-src/include)
+include_directories(src)
 
 configure_file(src/parquet/parquet_version.h.in ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/parquet/parquet_version.h @ONLY)
 
