@@ -29,6 +29,7 @@ class cmake_then_build(build):
 
 
 os.makedirs('build/pyodide/pyarrow/parquet',exist_ok=True)
+os.makedirs('build/pyodide/pyarrow/vendored',exist_ok=True)
 
 setup(name='pyarrow',
       version='8.0',
@@ -38,7 +39,7 @@ setup(name='pyarrow',
       url='https://www.cs.nott.ac.uk/~pszjm2/',
       include_package_data=True,
       packages=['pyarrow','pyarrow.parquet'],
-      package_dir = { 'pyarrow' : 'build/pyodide/pyarrow','pyarrow.parquet':'build/pyodide/pyarrow/parquet'},
+      package_dir = { 'pyarrow' : 'build/pyodide/pyarrow','pyarrow.parquet':'build/pyodide/pyarrow/parquet','pyarrow.vendored':'build/pyodide/pyarrow/vendored'},
       cmdclass={'build':cmake_then_build},
       package_data={'':["*.so"]}
      )

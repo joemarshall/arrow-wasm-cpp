@@ -5,8 +5,10 @@ ExternalProject_Add(flatbuffers
     GIT_TAG           v2.0.5
     SOURCE_DIR        "${CMAKE_BINARY_DIR}/../flatbuffers-src"
     BINARY_DIR        "${CMAKE_BINARY_DIR}/../flatbuffers-build"
-    CONFIGURE_COMMAND cd ${CMAKE_BINARY_DIR}/../flatbuffers-src && env -i HOME="$HOME" bash -l -c "cmake -G \"Unix Makefiles\" ."
-    BUILD_COMMAND     cd ${CMAKE_BINARY_DIR}/../flatbuffers-src && env -i HOME="$HOME" bash -l -c make flatc
+    CONFIGURE_COMMAND ""
+#cd ${CMAKE_BINARY_DIR}/../flatbuffers-src && env -i HOME="$HOME" bash -l -c "cmake -G \"Unix Makefiles\" ."
+    BUILD_COMMAND     ""
+#cd ${CMAKE_BINARY_DIR}/../flatbuffers-src && env -i HOME="$HOME" bash -l -c make flatc
     INSTALL_COMMAND   ""
     TEST_COMMAND      ""
     CMAKE_ARGS        ""

@@ -302,10 +302,11 @@ import pyodide as __pyodide
 import pyodide_js as __pjs
 import js as __js
 __pjs._module.loadDynamicLibrary("/lib/python3.10/site-packages/pyarrow/libarrow.so",__pyodide.to_js({"global":True,"loadAsync":False},dict_converter=__js.Object.fromEntries))
+
 ]=]
 )
 file(APPEND ${CMAKE_BINARY_DIR}/pyodide/pyarrow/__init__.py ${OLD_INIT_PY})
-
+file(APPEND ${CMAKE_BINARY_DIR}/pyodide/pyarrow/__init__.py __version__="8.0.0")
 copy_python_source(compat.py)
 copy_python_source(ipc.py)
 
