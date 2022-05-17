@@ -28,8 +28,18 @@ class cmake_then_build(build):
             self.spawn(['cmake','--build','.','-j','16'])
 
 
-os.makedirs('build/pyodide/pyarrow/parquet',exist_ok=True)
-os.makedirs('build/pyodide/pyarrow/vendored',exist_ok=True)
+# make empty packages for things created during cmake or else bad things might happen
+# cmake will copy the real ones across during build
+def make_empty_package(name):
+    os.makedirs(f'build/pyodide/pyarrow/{name}',exist_ok=True)
+    init_file=f'build/pyodide/pyarrow/{name}/__init__.py'
+    if not os.path.exists(init_file):
+        with open(init_file,'w') as fp:
+            fp.write("\n")
+
+make_empty_package("parquet")
+make_empty_package("vendored")
+
 
 setup(name='pyarrow',
       version='8.0',
@@ -38,7 +48,7 @@ setup(name='pyarrow',
       author_email='joe.marshall@nottingham.ac.uk',
       url='https://www.cs.nott.ac.uk/~pszjm2/',
       include_package_data=True,
-      packages=['pyarrow','pyarrow.parquet'],
+      packages=['pyarrow','pyarrow.parquet','pyarrow.vendored'],
       package_dir = { 'pyarrow' : 'build/pyodide/pyarrow','pyarrow.parquet':'build/pyodide/pyarrow/parquet','pyarrow.vendored':'build/pyodide/pyarrow/vendored'},
       cmdclass={'build':cmake_then_build},
       package_data={'':["*.so"]}
