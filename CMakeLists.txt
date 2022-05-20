@@ -85,7 +85,7 @@ set(ARROW_CSV ON)
 #set(ARROW_WITH_BROTLI ON)
 #set(ARROW_WITH_ZSTD ON)
 #set(ARROW_WITH_LZ4 ON)
-#set(ARROW_WITH_SNAPPY ON)
+set(ARROW_WITH_SNAPPY ON)
 set(ARROW_WITH_BZ2 ON)
 set(ARROW_PYTHON ON)
 set(ARROW_JNI OFF)
@@ -132,13 +132,20 @@ function (build_dep name)
             EXCLUDE_FROM_ALL)
 	elseif(${name} STREQUAL flatbuffers)
         # add to include folders
-        # we build it with native tools rather than emcc etc. as we need flatc to be available during arrow build
-        # rather than to build anything in
         include_directories(${CMAKE_BINARY_DIR}/${name}-src/include)
     elseif(${name} STREQUAL thrift)
         include_directories(${CMAKE_BINARY_DIR}/thrift-src/lib/cpp/src)
         include_directories(${CMAKE_BINARY_DIR}/thrift-build)
-	link_directories(${CMAKE_BINARY_DIR}/thrift-build/lib)
+    	link_directories(${CMAKE_BINARY_DIR}/thrift-build/lib)
+    elseif(${name} STREQUAL snappy)
+        configure_file(${CMAKE_SOURCE_DIR}/cmake/snappy/CMakeLists.txt ${CMAKE_BINARY_DIR}/snappy-src/ COPYONLY)
+        include_directories(${CMAKE_BINARY_DIR}/${name}-src/include)
+        include_directories(${CMAKE_BINARY_DIR}/${name}-src)
+        include_directories(${CMAKE_BINARY_DIR}/${name}-build)
+    	link_directories(${CMAKE_BINARY_DIR}/snappy-build)
+        add_subdirectory(${CMAKE_BINARY_DIR}/${name}-src
+            ${CMAKE_BINARY_DIR}/${name}-build
+            EXCLUDE_FROM_ALL)
     else()
         include_directories(${CMAKE_BINARY_DIR}/${name}-src/include)
         include_directories(${CMAKE_BINARY_DIR}/${name}-src)
@@ -170,10 +177,11 @@ function(copy_python_source name)
                 ${CMAKE_BINARY_DIR}/pyodide/pyarrow/${name})
 endfunction()
 
+build_dep(snappy)
 build_dep(thrift)
 build_dep(flatbuffers)
-build_dep(arrow)
 build_dep(rapidjson)
+build_dep(arrow)
 
 # make the shared library for arrow
 file(WRITE ${CMAKE_BINARY_DIR}/null.cpp "")
@@ -181,9 +189,13 @@ add_executable(arrow_pyodide ${CMAKE_BINARY_DIR}/null.cpp)
 set_target_properties(arrow_pyodide PROPERTIES RUNTIME_OUTPUT_DIRECTORY "./pyodide/pyarrow/")
 set_target_properties(arrow_pyodide PROPERTIES OUTPUT_NAME "libarrow")
 set_target_properties(arrow_pyodide PROPERTIES SUFFIX ".so")
-target_link_libraries(arrow_pyodide arrow thrift)
+target_link_libraries(arrow_pyodide arrow thrift snappy)
 
 # make the python module
+
+
+
+
 
 build_cython_submodule(lib)
 #build_cython_submodule(_plasma)
@@ -205,14 +217,27 @@ build_cython_submodule(_parquet)
 build_cython_submodule(_compute)
 #build_cython_submodule(_flight)
 
-copy_python_source(filesystem.py)
-copy_python_source(serialization.py)
-copy_python_source(flight.py)
+copy_python_source(_compute_docstrings.py)
 copy_python_source(benchmark.py)
-copy_python_source(plasma.py)
+copy_python_source(cffi.py)
+copy_python_source(compat.py)
+copy_python_source(compute.py)
+copy_python_source(csv.py)
+copy_python_source(cuda.py)
+copy_python_source(dataset.py)
+copy_python_source(feather.py)
+copy_python_source(filesystem.py)
+copy_python_source(flight.py)
+copy_python_source(fs.py)
+copy_python_source(hdfs.py)
+copy_python_source(ipc.py)
+copy_python_source(json.py)
 copy_python_source(jvm.py)
-copy_python_source(pandas_compat.py)
 copy_python_source(orc.py)
+copy_python_source(pandas_compat.py)
+copy_python_source(parquet.py)
+copy_python_source(plasma.py)
+copy_python_source(serialization.py)
 #copy_python_source(tests/test_dataset.py)
 #copy_python_source(tests/test_types.py)
 #copy_python_source(tests/test_filesystem.py)
@@ -249,51 +274,35 @@ copy_python_source(orc.py)
 #copy_python_source(tests/util.py)
 #copy_python_source(tests/test_csv.py)
 #copy_python_source(tests/strategies.py)
-#copy_python_source(tests/read_record_batch.py)
-#copy_python_source(tests/test_misc.py)
-#copy_python_source(tests/test_exec_plan.py)
-#copy_python_source(tests/test_table.py)
-#copy_python_source(tests/test_cffi.py)
-#copy_python_source(tests/parquet/test_dataset.py)
-#copy_python_source(tests/parquet/test_metadata.py)
-#copy_python_source(tests/parquet/test_pandas.py)
-#copy_python_source(tests/parquet/test_data_types.py)
-#copy_python_source(tests/parquet/test_compliant_nested_type.py)
-#copy_python_source(tests/parquet/common.py)
-#copy_python_source(tests/parquet/conftest.py)
-#copy_python_source(tests/parquet/test_encryption.py)
-#copy_python_source(tests/parquet/test_basic.py)
-#copy_python_source(tests/parquet/encryption.py)
-#copy_python_source(tests/parquet/test_parquet_file.py)
-#copy_python_source(tests/parquet/test_datetime.py)
-#copy_python_source(tests/parquet/__init__.py)
-#copy_python_source(tests/parquet/test_parquet_writer.py)
-#copy_python_source(tests/test_adhoc_memory_leak.py)
-#copy_python_source(tests/pandas_threaded_import.py)
-#copy_python_source(tests/test_json.py)
-#copy_python_source(tests/__init__.py)
-#copy_python_source(tests/test_util.py)
-#copy_python_source(tests/arrow_7980.py)
-#copy_python_source(tests/test_builder.py)
-#copy_python_source(tests/test_flight.py)
-#copy_python_source(tests/test_tensor.py)
-copy_python_source(fs.py)
-copy_python_source(csv.py)
-copy_python_source(cuda.py)
-copy_python_source(cffi.py)
+#copy_python_source(tests/test_misc.py
+#copy_python_source(tests/test_table.py
+#copy_python_source(tests/test_cffi.py
+#copy_python_source(tests/parquet/test_dataset.py
+#copy_python_source(tests/parquet/test_metadata.py
+#copy_python_source(tests/parquet/test_pandas.py
+#copy_python_source(tests/parquet/test_data_types.py
+#copy_python_source(tests/parquet/test_compliant_nested_type.py
+#copy_python_source(tests/parquet/common.py
+#copy_python_source(tests/parquet/conftest.py
+#copy_python_source(tests/parquet/test_basic.py
+#copy_python_source(tests/parquet/test_parquet_file.py
+#copy_python_source(tests/parquet/test_datetime.py
+#copy_python_source(tests/parquet/test_parquet_writer.py
+#copy_python_source(tests/test_adhoc_memory_leak.py
+#copy_python_source(tests/pandas_threaded_import.py
+#copy_python_source(tests/test_json.py
+#copy_python_source(tests/__init__.py
+#copy_python_source(tests/test_util.py
+#copy_python_source(tests/arrow_7980.py
+#copy_python_source(tests/test_builder.py
+#copy_python_source(tests/test_flight.py
+#copy_python_source(tests/test_tensor.py
+copy_python_source(types.py)
+copy_python_source(util.py)
 copy_python_source(vendored/docscrape.py)
 copy_python_source(vendored/version.py)
 copy_python_source(vendored/__init__.py)
-copy_python_source(json.py)
-copy_python_source(_compute_docstrings.py)
-copy_python_source(util.py)
-copy_python_source(types.py)
-copy_python_source(dataset.py)
-copy_python_source(compute.py)
-copy_python_source(parquet/encryption.py)
-copy_python_source(parquet/__init__.py)
-copy_python_source(feather.py)
-copy_python_source(hdfs.py)
+
 #copy_python_source(__init__.py)
 file(READ ${CMAKE_BINARY_DIR}/arrow-src/python/pyarrow/__init__.py OLD_INIT_PY)
 file(WRITE ${CMAKE_BINARY_DIR}/pyodide/pyarrow/__init__.py [=[

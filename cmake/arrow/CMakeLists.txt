@@ -41,7 +41,6 @@ set(ARROW_SRCS
     builder.cc
     buffer.cc
     chunked_array.cc
-    chunk_resolver.cc
     compare.cc
     config.cc
     datum.cc
@@ -88,7 +87,6 @@ set(ARROW_SRCS
     util/compression.cc
     util/counting_semaphore.cc
     util/cpu_info.cc
-    util/debug.cc
     util/decimal.cc
     util/delimiting.cc
     util/formatting.cc
@@ -105,7 +103,6 @@ set(ARROW_SRCS
     util/tdigest.cc
     util/thread_pool.cc
     util/time.cc
-    util/tracing.cc
     util/trie.cc
     util/unreachable.cc
     util/uri.cc
@@ -121,6 +118,27 @@ set(ARROW_SRCS
     vendored/double-conversion/fixed-dtoa.cc
     vendored/double-conversion/diy-fp.cc
     vendored/double-conversion/strtod.cc)
+
+set(ARROW_C_SRCS
+    vendored/musl/strptime.c
+    vendored/uriparser/UriCommon.c
+    vendored/uriparser/UriCompare.c
+    vendored/uriparser/UriEscape.c
+    vendored/uriparser/UriFile.c
+    vendored/uriparser/UriIp4Base.c
+    vendored/uriparser/UriIp4.c
+    vendored/uriparser/UriMemory.c
+    vendored/uriparser/UriNormalizeBase.c
+    vendored/uriparser/UriNormalize.c
+    vendored/uriparser/UriParseBase.c
+    vendored/uriparser/UriParse.c
+    vendored/uriparser/UriQuery.c
+    vendored/uriparser/UriRecompose.c
+    vendored/uriparser/UriResolve.c
+    vendored/uriparser/UriShorten.c)
+
+# Disable DLL exports in vendored uriparser library
+add_definitions(-DURI_STATIC_BUILD)
 
 if(ARROW_DATASET)
 
@@ -237,7 +255,6 @@ if(ARROW_COMPUTE)
        compute/cast.cc
        compute/exec.cc
        compute/exec/aggregate_node.cc
-       compute/exec/bloom_filter.cc
        compute/exec/exec_plan.cc
        compute/exec/expression.cc
        compute/exec/filter_node.cc
@@ -249,21 +266,16 @@ if(ARROW_COMPUTE)
        compute/exec/key_encode.cc
        compute/exec/key_hash.cc
        compute/exec/key_map.cc
-       compute/exec/options.cc
        compute/exec/order_by_impl.cc
-       compute/exec/partition_util.cc
-       compute/exec/options.cc
        compute/exec/project_node.cc
        compute/exec/sink_node.cc
        compute/exec/source_node.cc
        compute/exec/task_util.cc
-       compute/exec/tpch_node.cc
        compute/exec/union_node.cc
        compute/exec/util.cc
        compute/function.cc
        compute/function_internal.cc
        compute/kernel.cc
-       compute/light_array.cc
        compute/registry.cc
        compute/kernels/aggregate_basic.cc
        compute/kernels/aggregate_mode.cc
@@ -336,6 +348,7 @@ if(ARROW_WITH_ZSTD)
 endif()
 
 list(TRANSFORM ARROW_SRCS PREPEND ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/)
+list(TRANSFORM ARROW_C_SRCS PREPEND ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/)
 
 set(ARROW_PYTHON_SRCS
     arrow_to_pandas.cc
@@ -355,9 +368,10 @@ set(ARROW_PYTHON_SRCS
     numpy_to_arrow.cc
     python_to_arrow.cc
     pyarrow.cc
-    serialize.cc
-    udf.cc)
+    serialize.cc)
 
+set_source_files_properties(init.cc PROPERTIES SKIP_PRECOMPILE_HEADERS ON
+                                               SKIP_UNITY_BUILD_INCLUSION ON)
 
 if(ARROW_CSV)
   list(APPEND ARROW_PYTHON_SRCS csv.cc)
@@ -373,15 +387,63 @@ endif()
 
 list(TRANSFORM ARROW_PYTHON_SRCS PREPEND ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/python/)
 
-set(PARQUET_SRCS arrow/path_internal.cc arrow/reader.cc arrow/reader_internal.cc arrow/schema.cc 
-    arrow/schema_internal.cc arrow/writer.cc bloom_filter.cc column_reader.cc column_scanner.cc column_writer.cc 
-    encoding.cc encryption/encryption.cc encryption/internal_file_decryptor.cc 
-    encryption/internal_file_encryptor.cc exception.cc file_reader.cc file_writer.cc level_comparison.cc 
-    level_conversion.cc metadata.cc murmur3.cc ../generated/parquet_constants.cpp ../generated/parquet_types.cpp 
-    platform.cc printer.cc properties.cc schema.cc statistics.cc stream_reader.cc stream_writer.cc types.cc)
+set(PARQUET_SRCS
+    arrow/path_internal.cc
+    arrow/reader.cc
+    arrow/reader_internal.cc
+    arrow/schema.cc
+    arrow/schema_internal.cc
+    arrow/writer.cc
+    bloom_filter.cc
+    column_reader.cc
+    column_scanner.cc
+    column_writer.cc
+    encoding.cc
+    encryption/encryption.cc
+    encryption/internal_file_decryptor.cc
+    encryption/internal_file_encryptor.cc
+    exception.cc
+    file_reader.cc
+    file_writer.cc
+    level_comparison.cc
+    level_conversion.cc
+    metadata.cc
+    murmur3.cc
+    platform.cc
+    printer.cc
+    properties.cc
+    schema.cc
+    statistics.cc
+    stream_reader.cc
+    stream_writer.cc
+    types.cc)
+
+set (GENERATED_SRCS    
+parquet_constants.cpp
+parquet_types.cpp
+)
+
+
+if(PARQUET_REQUIRE_ENCRYPTION)
+  set(PARQUET_SRCS ${PARQUET_SRCS} encryption/encryption_internal.cc)
+  # Encryption key management
+  set(PARQUET_SRCS
+      ${PARQUET_SRCS}
+      encryption/crypto_factory.cc
+      encryption/file_key_unwrapper.cc
+      encryption/file_key_wrapper.cc
+      encryption/kms_client.cc
+      encryption/key_material.cc
+      encryption/key_metadata.cc
+      encryption/key_toolkit.cc
+      encryption/key_toolkit_internal.cc
+      encryption/local_wrap_kms_client.cc)
+else()
+  set(PARQUET_SRCS ${PARQUET_SRCS} encryption/encryption_internal_nossl.cc)
+endif()
 
 list(TRANSFORM PARQUET_SRCS PREPEND ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/parquet/)
-
+list(TRANSFORM GENERATED_SRCS PREPEND ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/generated/)
 
 set_property(SOURCE util/io_util.cc
            APPEND_STRING
@@ -401,7 +463,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
     set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif()
 
-add_library(arrow STATIC ${ARROW_SRCS} ${PARQUET_SRCS} ${ARROW_PYTHON_SRCS})
+add_library(arrow STATIC ${ARROW_SRCS} ${PARQUET_SRCS} ${GENERATED_SRCS} ${ARROW_PYTHON_SRCS} ${ARROW_C_SRCS})
 
 include_directories(${CMAKE_BINARY_DIR}/rapidjson-src/include)
 include_directories(/usr/local/include/)
