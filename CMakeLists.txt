@@ -34,6 +34,8 @@ set(CMAKE_CXX_FLAGS " \
     -s USE_ZLIB=1  \
     ")
 
+set(CMAKE_C_FLAGS ${CMAKE_CXX_FLAGS})
+
 set(CMAKE_EXE_LINKER_FLAGS "")
 set(CMAKE_C_LINK_FLAGS "")
 set(CMAKE_CXX_LINK_FLAGS "")
