@@ -167,6 +167,8 @@ set_target_properties(${name} PROPERTIES SUFFIX .so)
 add_dependencies(${name} arrow_pyodide)
 endfunction()
 
+
+
 function(copy_python_source name)
 # copy after arrow is downloaded and everything is build, not in configure step
     # make sure folder exists
@@ -176,7 +178,8 @@ function(copy_python_source name)
         TARGET arrow_pyodide PRE_BUILD
                 COMMAND ${CMAKE_COMMAND} -E copy
                 ${CMAKE_BINARY_DIR}/arrow-src/python/pyarrow/${name}
-                ${CMAKE_BINARY_DIR}/pyodide/pyarrow/${name})
+                ${CMAKE_BINARY_DIR}/pyodide/pyarrow/${name}
+        )
 endfunction()
 
 build_dep(snappy)
@@ -194,6 +197,12 @@ set_target_properties(arrow_pyodide PROPERTIES SUFFIX ".so")
 target_link_libraries(arrow_pyodide arrow thrift snappy)
 
 # make the python module
+# first modify code to disable threading
+add_custom_command(
+    TARGET arrow_pyodide PRE_BUILD
+            COMMAND find ${CMAKE_BINARY_DIR}/arrow-src/python/pyarrow/ -type f -exec sed -i 's/use_threads=True/use_threads=False/g' {} "\;"
+            COMMAND find ${CMAKE_BINARY_DIR}/arrow-src/python/pyarrow/ -type f -exec sed -i 's/pre_buffer=True/pre_buffer=False/g' {} "\;"
+    )
 
 
 
@@ -205,7 +214,8 @@ build_cython_submodule(_dataset)
 build_cython_submodule(_hdfs)
 build_cython_submodule(_hdfsio)
 build_cython_submodule(_fs)
-build_cython_submodule(_dataset_parquet)
+# remove dataset API because it is threaded
+#build_cython_submodule(_dataset_parquet)
 #build_cython_submodule(_feather)
 build_cython_submodule(_csv)
 build_cython_submodule(_json)
@@ -226,7 +236,8 @@ copy_python_source(compat.py)
 copy_python_source(compute.py)
 copy_python_source(csv.py)
 copy_python_source(cuda.py)
-copy_python_source(dataset.py)
+# remove dataset API because it is heavily threaded
+#copy_python_source(dataset.py)
 copy_python_source(feather.py)
 copy_python_source(filesystem.py)
 copy_python_source(flight.py)

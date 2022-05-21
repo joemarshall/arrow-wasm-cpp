@@ -37,7 +37,7 @@ def make_empty_package(name):
         with open(init_file,'w') as fp:
             fp.write("\n")
 
-make_empty_package("parquet")
+#make_empty_package("parquet")
 make_empty_package("vendored")
 
 
@@ -48,8 +48,10 @@ setup(name='pyarrow',
       author_email='joe.marshall@nottingham.ac.uk',
       url='https://www.cs.nott.ac.uk/~pszjm2/',
       include_package_data=True,
-      packages=['pyarrow','pyarrow.parquet','pyarrow.vendored'],
-      package_dir = { 'pyarrow' : 'build/pyodide/pyarrow','pyarrow.parquet':'build/pyodide/pyarrow/parquet','pyarrow.vendored':'build/pyodide/pyarrow/vendored'},
+#      packages=['pyarrow','pyarrow.parquet','pyarrow.vendored'],
+#      package_dir = { 'pyarrow' : 'build/pyodide/pyarrow','pyarrow.parquet':'build/pyodide/pyarrow/parquet','pyarrow.vendored':'build/pyodide/pyarrow/vendored'},
+      packages=['pyarrow','pyarrow.vendored'],
+      package_dir = { 'pyarrow' : 'build/pyodide/pyarrow','pyarrow.vendored':'build/pyodide/pyarrow/vendored'},
       cmdclass={'build':cmake_then_build},
       package_data={'':["*.so"]}
      )
