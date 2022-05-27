@@ -3,7 +3,7 @@ package:
   version: 7.0.0
 source:
   url: https://github.com/joemarshall/pyarrow-wasm/archive/refs/tags/7.0.0.tar.gz
-  sha256: 05c718c3c106b7fe5d900e80f9a8869ff9e2683cdf28d3a4d8eb302803fcbad6
+  sha256: ${PYARROW_WASM_SHA256}
   extract_dir: pyarrow-wasm-7.0.0
 test:
   imports:
