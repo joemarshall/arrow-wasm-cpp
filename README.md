@@ -1,24 +1,14 @@
-# arrow-wasm-cpp
-Standalone Apache Arrow compiled to WebAssembly, extracted from https://github.com/finos/perspective
+Standalone Apache Arrow compiled to WebAssembly for pyodide, extracted from https://github.com/finos/perspective
 
-Currently builds Apache Arrow version `5.0.0`.
+Currently builds Apache Arrow version `7.0.0`.
 
-[![Build Status](https://github.com/timkpaine/arrow-wasm-cpp/workflows/Build%20Status/badge.svg?branch=main)](https://github.com/timkpaine/arrow-wasm-cpp/actions?query=workflow%3A%22Build+Status%22)
-[![License](https://img.shields.io/github/license/timkpaine/arrow-wasm-cpp.svg)](https://github.com/timkpaine/arrow-wasm-cpp/)
-[![npm](https://img.shields.io/npm/v/apache-arrow-wasm)](https://www.npmjs.com/package/apache-arrow-wasm)
+Build inside a pyodide build folder, using the included meta file.
 
+The build is a setup.py wrapper around cmake.
 
-## Setup
-Install dependencies
-- flatbuffers
-- boost
+# Limitations
 
-
-## Build
-
-```bash
-mkdir build
-cd build/
-cmake ..
-cmake --build . -- -j8
-```
+There are several limitations of this library compared to normal pyarrow:
+1) Datasets is not included - this is because there is no threading support yet in pyodide. Once threads turn up this should work fine.
+2) There's no socket support in pyodide, so things relying on network connection don't work.
+3) Some other things which rely on threading (e.g. readahead) won't work and will fail with weird errors.
