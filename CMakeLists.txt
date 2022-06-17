@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.7.2)
 
+project(arrow_wasm VERSION "${ARROW_BASE_VERSION}")
+
+
 include(ExternalProject)
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules" ${CMAKE_MODULE_PATH})
@@ -47,7 +50,6 @@ set(ARROW_VERSION "8.0.0-SNAPSHOT")
 
 string(REGEX MATCH "^[0-9]+\\.[0-9]+\\.[0-9]+" ARROW_BASE_VERSION "${ARROW_VERSION}")
 
-project(arrow VERSION "${ARROW_BASE_VERSION}")
 
 set(ARROW_VERSION_MAJOR "${arrow_VERSION_MAJOR}")
 set(ARROW_VERSION_MINOR "${arrow_VERSION_MINOR}")
@@ -105,7 +107,7 @@ set(RAPIDJSON_BUILD_THIRDPARTY_GTEST OFF)
 set(RAPIDJSON_BUILD_CXX11 ON)
 option(RAPIDJSON_ENABLE_INSTRUMENTATION_OPT OFF)
 
-
+include_directories($ENV{PYTHONINCLUDE})
 include_directories(${CMAKE_BINARY_DIR}/flatbuffers-build/include/)
 include_directories (/src/cpython/installs/python-3.10.2/include/python3.10/)
 include_directories(/src/packages/.artifacts/lib/python3.10/site-packages/numpy/core/include/)
