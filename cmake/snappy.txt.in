@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.23)
 
 include(ExternalProject)
 
@@ -17,6 +17,7 @@ ExternalProject_Add(snappy
     GIT_TAG           1.1.8
     SOURCE_DIR        "${CMAKE_BINARY_DIR}/../snappy-src"
     BINARY_DIR        "${CMAKE_BINARY_DIR}/../snappy-build"
+    CONFIGURE_COMMAND ""
     BUILD_COMMAND     ""
     INSTALL_COMMAND   ""
     TEST_COMMAND      ""
