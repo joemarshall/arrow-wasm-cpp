@@ -129,6 +129,7 @@ function (build_dep name)
         configure_file(${CMAKE_SOURCE_DIR}/cmake/arrow/CMakeLists.txt ${CMAKE_BINARY_DIR}/arrow-src/cpp/ COPYONLY)
         configure_file(${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/config.h.cmake ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/config.h)
         include_directories(${CMAKE_BINARY_DIR}/arrow-src/cpp/src/)
+        include_directories(${CMAKE_BINARY_DIR}/arrow-src/cpp/thirdparty/flatbuffers/include)
         add_subdirectory(${CMAKE_BINARY_DIR}/${name}-src/cpp
             ${CMAKE_BINARY_DIR}/${name}-build
             EXCLUDE_FROM_ALL)
@@ -184,7 +185,7 @@ endfunction()
 
 build_dep(snappy)
 build_dep(thrift)
-build_dep(flatbuffers)
+#build_dep(flatbuffers)
 build_dep(rapidjson)
 build_dep(arrow)
 
