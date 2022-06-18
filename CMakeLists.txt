@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.7.2)
-
+set(ARROW_BASE_VERSION 7.0.0)
 project(arrow_wasm VERSION "${ARROW_BASE_VERSION}")
 
 
