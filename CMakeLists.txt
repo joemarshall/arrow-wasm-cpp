@@ -109,7 +109,7 @@ option(RAPIDJSON_ENABLE_INSTRUMENTATION_OPT OFF)
 include_directories($ENV{PYTHONINCLUDE})
 include_directories(${CMAKE_BINARY_DIR}/flatbuffers-build/include/)
 include_directories (/src/cpython/installs/python-3.10.2/include/python3.10/)
-include_directories(/src/packages/.artifacts/lib/python3.10/site-packages/numpy/core/include/)
+include_directories($ENV{NUMPY_LIB}/core/include/)
 include_directories(${CMAKE_BINARY_DIR}/arrow-src/cpp/thirdparty/hadoop/include)
 
 
