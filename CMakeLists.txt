@@ -1,6 +1,4 @@
 cmake_minimum_required(VERSION 3.7.2)
-set(ARROW_BASE_VERSION 7.0.0)
-project(arrow_wasm VERSION "${ARROW_BASE_VERSION}")
 
 
 include(ExternalProject)
@@ -49,11 +47,12 @@ cmake_policy(SET CMP0077 NEW)
 set(ARROW_VERSION "7.0.0")
 
 string(REGEX MATCH "^[0-9]+\\.[0-9]+\\.[0-9]+" ARROW_BASE_VERSION "${ARROW_VERSION}")
+project(arrow_wasm VERSION "${ARROW_BASE_VERSION}")
 
 
-set(ARROW_VERSION_MAJOR "${arrow_VERSION_MAJOR}")
-set(ARROW_VERSION_MINOR "${arrow_VERSION_MINOR}")
-set(ARROW_VERSION_PATCH "${arrow_VERSION_PATCH}")
+set(ARROW_VERSION_MAJOR "${arrow_wasm_VERSION_MAJOR}")
+set(ARROW_VERSION_MINOR "${arrow_wasm_VERSION_MINOR}")
+set(ARROW_VERSION_PATCH "${arrow_wasm_VERSION_PATCH}")
 if(ARROW_VERSION_MAJOR STREQUAL ""
    OR ARROW_VERSION_MINOR STREQUAL ""
    OR ARROW_VERSION_PATCH STREQUAL "")
