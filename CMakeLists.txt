@@ -7,6 +7,9 @@ set(NUMPY_INCLUDE "" CACHE STRING "Path to /numpy/core/include folder from numpy
 if(NOT NUMPY_INCLUDE )
     message(FATAL_ERROR "CMake needs NUMPY_INCLUDE variable to work. setup.py sets this")
 endif()
+if(NOT EXISTS ${NUMPY_INCLUDE})
+    message(FATAL_ERROR "Can't find NUMPY_INCLUDE folder ${NUMPY_INCLUDE}")
+endif()
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules" ${CMAKE_MODULE_PATH})
 

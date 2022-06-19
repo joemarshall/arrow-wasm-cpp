@@ -23,7 +23,7 @@ class cmake_then_build(build):
     def run_cmake(self):
         numpy_include_folder=get_numpy_include_dirs()[0]
         with changed_dir("build"):
-            self.spawn(['cmake','..',f'-DNUMPY_INCLUDE=${numpy_include_folder}'])
+            self.spawn(['cmake','..',f'-DNUMPY_INCLUDE={numpy_include_folder}'])
             self.spawn(['cmake','--build','.','-j','16'])
 
 
