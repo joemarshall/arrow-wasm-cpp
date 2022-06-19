@@ -3,6 +3,11 @@ cmake_minimum_required(VERSION 3.7.2)
 
 include(ExternalProject)
 
+set(NUMPY_INCLUDE "" CACHE STRING "Path to /numpy/core/include folder from numpy")
+if(NOT NUMPY_INCLUDE )
+    message(FATAL_ERROR "CMake needs NUMPY_INCLUDE variable to work. setup.py sets this")
+endif()
+
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules" ${CMAKE_MODULE_PATH})
 
 execute_process(COMMAND which emcc OUTPUT_VARIABLE EMCC)
@@ -109,7 +114,7 @@ option(RAPIDJSON_ENABLE_INSTRUMENTATION_OPT OFF)
 include_directories($ENV{PYTHONINCLUDE})
 include_directories(${CMAKE_BINARY_DIR}/flatbuffers-build/include/)
 include_directories (/src/cpython/installs/python-3.10.2/include/python3.10/)
-include_directories($ENV{NUMPY_LIB}/core/include/)
+include_directories(${NUMPY_INCLUDE})
 include_directories(${CMAKE_BINARY_DIR}/arrow-src/cpp/thirdparty/hadoop/include)
 
 

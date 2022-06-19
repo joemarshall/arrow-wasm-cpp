@@ -4,6 +4,7 @@ from distutils.core import setup
 
 from distutils.command.build import build
 import os
+from numpy.distutils.misc_util import get_numpy_include_dirs
 
 @contextlib.contextmanager
 def changed_dir(dirname):
@@ -16,15 +17,13 @@ def changed_dir(dirname):
 
 class cmake_then_build(build):
     def run(self):
-        print("RUNNING BUILD CMD")
         self.run_cmake()
-        print("WOO")
         build.run(self)
 
     def run_cmake(self):
-        print("RUNNING CMAKE")
+        numpy_include_folder=get_numpy_include_dirs()[0]
         with changed_dir("build"):
-            self.spawn(['cmake','..'])
+            self.spawn(['cmake','..',f'-DNUMPY_INCLUDE=${numpy_include_folder}'])
             self.spawn(['cmake','--build','.','-j','16'])
 
 
@@ -39,6 +38,7 @@ def make_empty_package(name):
 
 #make_empty_package("parquet")
 make_empty_package("vendored")
+
 
 
 setup(name='pyarrow',
