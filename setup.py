@@ -1,24 +1,26 @@
 import contextlib
 from glob import glob
-from distutils.core import setup
+from distutils.core import setup,Extension
 
-from distutils.command.build import build
+#from distutils.command.build import build
+from distutils.command.build_ext import build_ext
 import os
 from numpy.distutils.misc_util import get_numpy_include_dirs
 
 @contextlib.contextmanager
 def changed_dir(dirname):
     oldcwd = os.getcwd()
+    if not os.path.exists(dirname):
+        os.makedirs(dirname,exist_ok=True)
     os.chdir(dirname)
     try:
         yield
     finally:
         os.chdir(oldcwd)
 
-class cmake_then_build(build):
+class launch_cmake(build_ext):
     def run(self):
         self.run_cmake()
-        build.run(self)
 
     def run_cmake(self):
         numpy_include_folder=get_numpy_include_dirs()[0]
@@ -42,16 +44,15 @@ make_empty_package("vendored")
 
 
 setup(name='pyarrow',
-      version='8.0',
+      version='7.0',
       description='Python arrow library pyodide port',
       author='Apache',
       author_email='joe.marshall@nottingham.ac.uk',
       url='https://www.cs.nott.ac.uk/~pszjm2/',
       include_package_data=True,
-#      packages=['pyarrow','pyarrow.parquet','pyarrow.vendored'],
-#      package_dir = { 'pyarrow' : 'build/pyodide/pyarrow','pyarrow.parquet':'build/pyodide/pyarrow/parquet','pyarrow.vendored':'build/pyodide/pyarrow/vendored'},
+      ext_modules = [Extension("ignored", [""])],
       packages=['pyarrow','pyarrow.vendored'],
       package_dir = { 'pyarrow' : 'build/pyodide/pyarrow','pyarrow.vendored':'build/pyodide/pyarrow/vendored'},
-      cmdclass={'build':cmake_then_build},
+      cmdclass={'build_ext':launch_cmake},
       package_data={'':["*.so"]}
      )

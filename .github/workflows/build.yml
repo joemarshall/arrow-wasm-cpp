@@ -1,4 +1,4 @@
-name: Build Status
+name: Build for pyodide
 
 on:
   push:
@@ -6,42 +6,20 @@ on:
       - main
   pull_request:
 
-concurrency:
-   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
-   cancel-in-progress: true
-
 jobs:
-  build:
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-        node-version: [12.x]
-
-    steps:
-    - uses: actions/checkout@v2
-
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ matrix.node-version }}
-
-    - name: Install yarn
-      run: npm install -g yarn
-
-    - name: Install dependencies
-      run: |
-        yarn
-
-    - name: Lint
-      run: |
-        # yarn lint
-
-    - name: Build
-      run: |
-        yarn build
-
-    - name: Test
-      run: |
-        # yarn test
+    build:
+        runs-on: ubuntu-latest
+          steps:
+          - uses: actions/checkout@v3
+          - uses: actions/setup-python@v4
+             with:
+               python-version: 3.10.2
+          - uses: mymindstorm/setup-emsdk@v11
+             with:
+               version: 3.1.14
+          - run: pip install pyodide-build==0.21.0
+          - run: pyodide build
+          - uses: actions/upload-artifact@v3
+             with:
+               name: wheel distribution for pyodide
+               path: dist
