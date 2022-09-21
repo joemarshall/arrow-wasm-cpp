@@ -28,9 +28,21 @@ set(CMAKE_EXECUTABLE_SUFFIX ".js")
 
 set(CMAKE_CXX_FLAGS " \
     -fPIC \
-    --bind \
-    --source-map-base ./build/ \
-    --memory-init-file 0 \
+    -Wall \
+    -s SIDE_MODULE=1 \
+    -fcolor-diagnostics \
+    -s USE_BOOST_HEADERS=1 \
+    -s USE_BZIP2=1 \
+    -s USE_ZLIB=1  \
+    ")
+
+set(CMAKE_C_FLAGS ${CMAKE_CXX_FLAGS})
+
+set( CMAKE_SHARED_LINKER_FLAGS "\
+    -fPIC \
+   --bind \
+   --source-map-base ./build/ \
+   --memory-init-file 0 \
     -Wall \
     -s WASM=1 \
     -s SIDE_MODULE=1 \
@@ -43,9 +55,9 @@ set(CMAKE_CXX_FLAGS " \
     -s USE_ZLIB=1  \
     ")
 
-set(CMAKE_C_FLAGS ${CMAKE_CXX_FLAGS})
+set(CMAKE_EXE_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS})
+set(CMAKE_MODULE_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS})
 
-set(CMAKE_EXE_LINKER_FLAGS "")
 set(CMAKE_C_LINK_FLAGS "")
 set(CMAKE_CXX_LINK_FLAGS "")
 set(HAVE_FLAG_SEARCH_PATHS_FIRST 0)
